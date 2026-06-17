@@ -127,13 +127,18 @@
     border:1px solid #25232c;border-radius:10px;padding:16px;margin-bottom:14px;
     background:#1a1822;
   }
-  .spk-count{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
+  .spk-count{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
   .spk-opt{background:#0f0e14;border:1px solid #2a2834;border-radius:6px;color:#cfd8de;
     font-family:var(--sans);font-weight:600;font-size:14px;padding:9px 0;cursor:pointer;transition:all .15s;}
   .spk-opt:hover{border-color:#6B8FA1;}
   .spk-opt.is-on{background:#6B8FA1;border-color:#6B8FA1;color:#0f0e14;}
   .spk-block{border-top:1px solid #26242f;margin-top:14px;padding-top:12px;}
   .spk-block .spk-h{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a8595;margin-bottom:8px;}
+  .filebtn-row{display:flex;align-items:center;gap:10px;}
+  .filebtn-row .filebtn{flex:1;margin:0;}
+  .img-thumb{width:46px;height:46px;flex:0 0 46px;border-radius:6px;object-fit:cover;
+    border:1px solid #2a2834;background:#0f0e14;display:block;}
+  body.light .img-thumb{border-color:#d4d7dd;background:#fff;}
   .group .gtitle{
     font-family:var(--sans);font-weight:700;font-size:11px;letter-spacing:.28em;
     text-transform:uppercase;color:#cfd8de;margin-bottom:14px;
@@ -284,7 +289,10 @@
     <div class="group">
       <div class="gtitle">Background image</div>
       <label for="f_bg">Upload (jpg/png) — replaces canyon photo</label>
-      <label class="filebtn" id="f_bg_lbl" for="f_bg">Choose image…</label>
+      <div class="filebtn-row">
+        <img class="img-thumb" id="f_bg_thumb" src="assets/canyon-bg.jpg" alt="" />
+        <label class="filebtn" id="f_bg_lbl" for="f_bg">Choose image…</label>
+      </div>
       <input type="file" id="f_bg" accept="image/*" />
       <label>Or paste image URL</label>
       <input type="text" id="f_bg_url" placeholder="https://…" />
@@ -295,7 +303,6 @@
       <div class="gtitle">Speakers</div>
       <label>Number of speakers</label>
       <div class="spk-count" id="spk_count">
-        <button type="button" class="spk-opt" data-n="1">1</button>
         <button type="button" class="spk-opt" data-n="2">2</button>
         <button type="button" class="spk-opt is-on" data-n="3">3</button>
         <button type="button" class="spk-opt" data-n="4">4</button>
@@ -304,7 +311,8 @@
     </div>
 
     <div class="actions">
-      <button class="primary" id="export_png">Download Webinar Graphics</button>
+      <button class="primary" id="export_png" style="background:#C0392B;color:#fff;">Download Images</button>
+      <button class="primary" id="export_ppt" style="background:#000;color:#fff;">Export as PPT</button>
       <button class="ghost" id="reset">Reset to Defaults</button>
     </div>
   </aside>
@@ -344,9 +352,10 @@
 
 <div class="toast" id="toast">Saved</div>
 
-<!-- html-to-image for PNG export, JSZip for bundling -->
+<!-- html-to-image for PNG export, JSZip for bundling, PptxGenJS for PowerPoint export -->
 <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
 <script>
 (function(){
@@ -496,16 +505,19 @@
     });
   }
 
-  function setBg(url){ lastBg = url; broadcast(); }
+  function setBg(url){ lastBg = url; var t=$('f_bg_thumb'); if(t&&url) t.src=url; broadcast(); }
   onFile('f_bg','f_bg_lbl', setBg);
   $('f_bg_url').addEventListener('input', e=>{ if(e.target.value.trim()) setBg(e.target.value.trim()); });
+
+  // default portraits shown as thumbnails until the user uploads their own
+  const SPK_DEFAULT_PHOTOS = ['assets/jeff.jpeg','assets/dhruv.png','assets/loic.jpg','assets/loic.jpg'];
 
   // ── dynamic speakers (1–4) ──
   const SPK_DEFAULTS = [
     { name:'Jeff Welday',    cred:'',                  title:'Chief Development Officer\nWestern Alternative Strategies' },
     { name:'Dhruv Maniktala',cred:'CFA®',              title:'Chief Investment Officer; Partner' },
     { name:'Loic LeMener',   cred:'CFA®, MBA, CFP®',   title:'President, Opus Wealth Management' },
-    { name:'',               cred:'',                  title:'' }
+    { name:'Loic LeMener',   cred:'CFA®, MBA, CFP®',   title:'President, Opus Wealth Management' }
   ];
   const spkPhotos = ['','','',''];
   let spkCount = 3;
@@ -526,14 +538,18 @@
         '<input type="text" id="f_s'+n+'_cred" value="'+(d.cred||'').replace(/"/g,'&quot;')+'" placeholder="e.g. CFA®, MBA" />'+
         '<label>Title / Affiliation (use line breaks)</label>'+
         '<textarea id="f_s'+n+'_title">'+(d.title||'')+'</textarea>'+
-        '<label class="filebtn" id="f_s'+n+'_photo_lbl" for="f_s'+n+'_photo">'+(spkPhotos[i]?'✓ portrait set':'Choose portrait…')+'</label>'+
+        '<label>Portrait</label>'+
+        '<div class="filebtn-row">'+
+          '<img class="img-thumb" id="f_s'+n+'_thumb" src="'+(spkPhotos[i]||SPK_DEFAULT_PHOTOS[i]||'')+'" alt="" />'+
+          '<label class="filebtn" id="f_s'+n+'_photo_lbl" for="f_s'+n+'_photo">'+(spkPhotos[i]?'✓ portrait set':'Choose portrait…')+'</label>'+
+        '</div>'+
         '<input type="file" id="f_s'+n+'_photo" accept="image/*" />';
       wrap.appendChild(block);
       // wire text inputs
       ['f_s'+n+'_name','f_s'+n+'_cred','f_s'+n+'_title'].forEach(id=> $(id).addEventListener('input', broadcast));
       // wire photo
       (function(idx){
-        onFile('f_s'+n+'_photo','f_s'+n+'_photo_lbl', url=>{ spkPhotos[idx]=url; broadcast(); });
+        onFile('f_s'+(idx+1)+'_photo','f_s'+(idx+1)+'_photo_lbl', url=>{ spkPhotos[idx]=url; var t=$('f_s'+(idx+1)+'_thumb'); if(t) t.src=url; broadcast(); });
       })(i);
     }
     broadcast();
@@ -566,6 +582,8 @@
       ifr.src = srcPath;
       ifr.onload = async ()=>{
         try {
+          // push the current form state so the export reflects the user's edits
+          try { ifr.contentWindow.postMessage(buildState(), '*'); } catch(e){}
           // wait for fonts and one extra paint cycle
           if (ifr.contentDocument && ifr.contentDocument.fonts && ifr.contentDocument.fonts.ready) {
             await ifr.contentDocument.fonts.ready;
@@ -595,38 +613,148 @@
     return new Blob([arr], {type:mime});
   }
 
+  const FORMATS = [
+    { src: 'Zoom Registration Banner.html',        w: 1280, h: 400,  name: 'zoom-registration-banner-1280x400.png' },
+    { src: 'Featured Section - Register.html',      w: 1200, h: 627,  name: 'featured-section-register-1200x627.png' },
+    { src: 'Featured Section - Watch Now.html',     w: 1200, h: 627,  name: 'featured-section-watch-now-1200x627.png' },
+    { src: 'LinkedIn Post.html',                    w: 1200, h: 1600, name: 'linkedin-post-1200x1600.png' },
+    { src: 'Zoom Cover Slide.html',                 w: 2048, h: 1152, name: 'zoom-cover-slide-2048x1152.png' },
+    { src: 'Zoom Waiting Room.html',                w: 1280, h: 400,  name: 'zoom-waiting-room-1280x400.png' },
+    { src: 'Newsletter.html',                       w: 600,  h: 400,  name: 'newsletter-600x400.png' }
+  ];
+  async function renderAll(btn){
+    const out = [];
+    for (const f of FORMATS){
+      try {
+        if(btn) btn.textContent = 'Rendering '+f.src.replace('.html','')+'…';
+        const url = await captureIframe(f.src, f.w, f.h);
+        out.push({ name:f.name, blob:dataUrlToBlob(url) });
+      } catch(e){ console.warn('skip', f.src, e); }
+    }
+    return out;
+  }
+
   $('export_png').addEventListener('click', async ()=>{
     const btn = $('export_png');
     const orig = btn.textContent;
     btn.disabled = true; btn.textContent = 'Rendering…';
     try {
       const zip = new JSZip();
-
-      const formats = [
-        { src: 'Zoom Registration Banner.html',        w: 1280, h: 400,  name: 'zoom-registration-banner-1280x400.png' },
-        { src: 'Featured Section - Register.html',      w: 1200, h: 627,  name: 'featured-section-register-1200x627.png' },
-        { src: 'Featured Section - Watch Now.html',     w: 1200, h: 627,  name: 'featured-section-watch-now-1200x627.png' },
-        { src: 'LinkedIn Post.html',                    w: 1200, h: 1600, name: 'linkedin-post-1200x1600.png' },
-        { src: 'Zoom Cover Slide.html',                 w: 2048, h: 1152, name: 'zoom-cover-slide-2048x1152.png' },
-        { src: 'Zoom Waiting Room.html',                w: 1280, h: 400,  name: 'zoom-waiting-room-1280x400.png' },
-        { src: 'Newsletter.html',                       w: 600,  h: 400,  name: 'newsletter-600x400.png' }
-      ]
-      for (const f of formats){
-        try {
-          btn.textContent = 'Rendering '+f.src.replace('.html','')+'…';
-          const url = await captureIframe(f.src, f.w, f.h);
-          zip.file(f.name, dataUrlToBlob(url));
-        } catch(e){ console.warn('skip', f.src, e); }
-      }
-
+      const imgs = await renderAll(btn);
+      imgs.forEach(im=> zip.file(im.name, im.blob));
       btn.textContent = 'Zipping…';
       const blob = await zip.generateAsync({type:'blob'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'western-webinar-graphics.zip';
       document.body.appendChild(a); a.click(); a.remove();
-      toast('Graphics downloaded');
+      toast('Images downloaded');
     } catch(e){ console.error(e); toast('Export failed'); }
+    btn.disabled = false; btn.textContent = orig;
+  });
+
+  // ── Export as PPT: editable PowerPoint per graphic (text as native text boxes) ──
+  function rgbToHex(c){ const m=(c||'').match(/[\d.]+/g); if(!m) return '000000'; const h=n=>('0'+Math.round(+n).toString(16)).slice(-2); return (h(m[0])+h(m[1])+h(m[2])).toUpperCase(); }
+  function buildEditablePptx(fmt){
+    return new Promise((resolve, reject)=>{
+      const ifr = document.createElement('iframe');
+      ifr.style.cssText = 'position:fixed;left:-99999px;top:0;width:'+fmt.w+'px;height:'+fmt.h+'px;border:0;visibility:hidden;';
+      ifr.src = fmt.src + '?v=' + Date.now();
+      ifr.onload = async ()=>{
+        try{
+          const doc = ifr.contentDocument, win = ifr.contentWindow;
+          try { win.postMessage(buildState(), '*'); } catch(e){}
+          if (doc.fonts && doc.fonts.ready) await doc.fonts.ready;
+          await new Promise(r=> setTimeout(r, 700));
+          const frame = doc.getElementById('frame');
+          const prevT = frame.style.transform; frame.style.transform = 'scale(1)';
+          const fr = frame.getBoundingClientRect();
+
+          // collect editable text elements (skip hidden)
+          const cand = [...doc.querySelectorAll('[data-field], .when .label, .speaker .role, .kicker')];
+          const records = [];
+          cand.forEach(el=>{
+            const cs = getComputedStyle(el);
+            if (cs.display==='none' || cs.visibility==='hidden') return;
+            const r = el.getBoundingClientRect();
+            if (r.width<1 || r.height<1) return;
+            const credChild = el.querySelector('.cred');
+            let txt;
+            if (credChild){ const clone=el.cloneNode(true); clone.querySelectorAll('.cred').forEach(c=>c.remove()); txt=clone.innerText.trim(); }
+            else txt = el.innerText.trim();
+            if (txt) records.push({el, r, cs, txt});
+            if (credChild){
+              const ccs = getComputedStyle(credChild); const cr = credChild.getBoundingClientRect();
+              const ct = credChild.innerText.trim();
+              if (ct && cr.width>=1) records.push({el:credChild, r:cr, cs:ccs, txt:ct});
+            }
+          });
+
+          // hide text, capture background (photo + pills + rules + portraits + logo)
+          const hideEls = [...new Set(records.map(x=>x.el))];
+          const prevVis = hideEls.map(el=>el.style.visibility);
+          hideEls.forEach(el=> el.style.visibility='hidden');
+          const bg = await htmlToImage.toPng(frame, {width:fmt.w, height:fmt.h, pixelRatio:2, backgroundColor:'#1D1A1B'});
+          hideEls.forEach((el,i)=> el.style.visibility = prevVis[i]);
+          frame.style.transform = prevT;
+
+          const wIn = fmt.w/96, hIn = fmt.h/96;
+          const pptx = new PptxGenJS();
+          pptx.defineLayout({ name:'L', width:wIn, height:hIn });
+          pptx.layout = 'L';
+          const slide = pptx.addSlide();
+          slide.addImage({ data:bg, x:0, y:0, w:wIn, h:hIn });
+
+          records.forEach(rec=>{
+            const x=(rec.r.left-fr.left)/96, y=(rec.r.top-fr.top)/96;
+            const w=Math.max(rec.r.width/96+0.06, 0.3), h=rec.r.height/96+0.08;
+            const fontPt=parseFloat(rec.cs.fontSize)*0.75;
+            const ta=rec.cs.textAlign;
+            const align = ta==='center'?'center':((ta==='right'||ta==='end')?'right':'left');
+            const fam=(rec.cs.fontFamily.split(',')[0]||'Arial').replace(/['"]/g,'');
+            const bold=parseInt(rec.cs.fontWeight,10)>=600;
+            const italic=rec.cs.fontStyle==='italic';
+            const upper=rec.cs.textTransform==='uppercase';
+            let lines=rec.txt.split('\n').map(s=>s.trim()).filter(Boolean);
+            if(upper) lines=lines.map(s=>s.toUpperCase());
+            const runs=lines.map(ln=>({text:ln, options:{breakLine:true}}));
+            const lsPt=parseFloat(rec.cs.lineHeight); 
+            const opts={x,y,w,h,fontFace:fam,fontSize:fontPt,color:rgbToHex(rec.cs.color),bold,italic,align,valign:'top',margin:0,charSpacing:(parseFloat(rec.cs.letterSpacing)||0)*0.75};
+            if(!isNaN(lsPt)) opts.lineSpacing=lsPt*0.75;
+            slide.addText(runs, opts);
+          });
+
+          const blob = await pptx.write('blob');
+          ifr.remove();
+          resolve(blob);
+        }catch(e){ ifr.remove(); reject(e); }
+      };
+      ifr.onerror = ()=>{ ifr.remove(); reject(new Error('iframe load failed: '+fmt.src)); };
+      document.body.appendChild(ifr);
+    });
+  }
+  $('export_ppt').addEventListener('click', async ()=>{
+    const btn = $('export_ppt');
+    const orig = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Rendering…';
+    try {
+      const zip = new JSZip();
+      for (let i=0;i<FORMATS.length;i++){
+        const fmt = FORMATS[i];
+        btn.textContent = 'Building PPT '+(i+1)+'/'+FORMATS.length+'…';
+        try {
+          const blob = await buildEditablePptx(fmt);
+          zip.file(fmt.name.replace(/\.png$/,'.pptx'), blob);
+        } catch(e){ console.warn('skip ppt', fmt.src, e); }
+      }
+      btn.textContent = 'Zipping…';
+      const blob = await zip.generateAsync({type:'blob'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'western-webinar-powerpoints.zip';
+      document.body.appendChild(a); a.click(); a.remove();
+      toast('Editable PowerPoint files downloaded');
+    } catch(e){ console.error(e); toast('PPT export failed'); }
     btn.disabled = false; btn.textContent = orig;
   });
 
@@ -649,11 +777,12 @@
     // reset background file input + label
     const bg=$('f_bg'); if(bg) bg.value='';
     const lblBg=$('f_bg_lbl'); if(lblBg){ lblBg.textContent='Choose image…'; lblBg.classList.remove('has'); }
+    const bgThumb=$('f_bg_thumb'); if(bgThumb) bgThumb.src='assets/canyon-bg.jpg';
     // reset speakers to 3 + defaults
     SPK_DEFAULTS[0]={name:'Jeff Welday',cred:'',title:'Chief Development Officer\nWestern Alternative Strategies'};
     SPK_DEFAULTS[1]={name:'Dhruv Maniktala',cred:'CFA®',title:'Chief Investment Officer; Partner'};
     SPK_DEFAULTS[2]={name:'Loic LeMener',cred:'CFA®, MBA, CFP®',title:'President, Opus Wealth Management'};
-    SPK_DEFAULTS[3]={name:'',cred:'',title:''};
+    SPK_DEFAULTS[3]={name:'Loic LeMener',cred:'CFA®, MBA, CFP®',title:'President, Opus Wealth Management'};
     spkPhotos[0]=spkPhotos[1]=spkPhotos[2]=spkPhotos[3]='';
     spkCount=3;
     document.querySelectorAll('#spk_count .spk-opt').forEach(b=>b.classList.toggle('is-on', +b.dataset.n===3));
@@ -682,8 +811,8 @@
       tog.textContent = light ? '☾ Dark' : '☀ Light';
       try{ localStorage.setItem('wgb-theme', light?'light':'dark'); }catch(e){}
     }
-    let light=false;
-    try{ light = localStorage.getItem('wgb-theme')==='light'; }catch(e){}
+    let light=true;
+    try{ const v=localStorage.getItem('wgb-theme'); if(v) light = (v==='light'); }catch(e){}
     apply(light);
     tog.addEventListener('click', ()=> apply(!document.body.classList.contains('light')));
   })();

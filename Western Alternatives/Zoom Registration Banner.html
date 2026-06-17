@@ -164,6 +164,13 @@
     font-size:16px;line-height:1.3;color:var(--limestone);letter-spacing:.01em;
     align-self:start;margin-top:4px;
   }
+  /* Compact sizing when 4 speakers */
+  .speakers.cnt4{gap:12px;}
+  .speakers.cnt4 .speaker{grid-template-columns:70px minmax(0,1fr);column-gap:13px;}
+  .speakers.cnt4 .portrait{width:70px;height:70px;}
+  .speakers.cnt4 .speaker .name{font-size:18px;line-height:1.05;}
+  .speakers.cnt4 .speaker .name .cred{font-size:11px;margin-top:1px;}
+  .speakers.cnt4 .speaker .title-line{font-size:12px;line-height:1.25;margin-top:2px;}
 
   /* "Starting soon" status — lower left */
   .status{
@@ -242,6 +249,13 @@
             <div class="title-line" data-field="s3-title">President, Opus Wealth Management</div>
           </div>
         </div>
+        <div class="speaker" style="display:none">
+          <div class="portrait"><img src="assets/loic.jpg" alt="" /></div>
+          <div class="who">
+            <div class="name" data-field="s4-name">Loic LeMener<span class="cred">CFA®, MBA, CFP®</span></div>
+            <div class="title-line" data-field="s4-title">President, Opus Wealth Management</div>
+          </div>
+        </div>
       </div>
 
       <!-- Starting soon removed -->
@@ -298,6 +312,13 @@
     if (d.s2Title != null) setHtml('[data-field="s2-title"]', d.s2Title);
     if (d.s1Photo) setPortrait(0, d.s1Photo);
     if (d.s2Photo) setPortrait(1, d.s2Photo);
+    if (d.s3Name != null) setHtml('[data-field="s3-name"]', d.s3Name);
+    if (d.s3Title != null) setHtml('[data-field="s3-title"]', d.s3Title);
+    if (d.s3Photo) setPortrait(2, d.s3Photo);
+    if (d.s4Name != null) setHtml('[data-field="s4-name"]', d.s4Name);
+    if (d.s4Title != null) setHtml('[data-field="s4-title"]', d.s4Title);
+    if (d.s4Photo) setPortrait(3, d.s4Photo);
+    if (d.speakerCount != null){ var _sps=document.querySelectorAll('.speaker'); _sps.forEach((el,i)=>{ el.style.display=(i<d.speakerCount)?'':'none'; }); var _c=document.querySelector('.speakers'); if(_c){ _c.classList.toggle('cnt4', d.speakerCount===4); if(d.speakerCount<=2){ _c.style.justifyContent='center'; _sps.forEach(el=>el.style.flex='0 0 auto'); } else { _c.style.justifyContent=''; _sps.forEach(el=>el.style.flex=''); } } }
   });
   window.parent && window.parent.postMessage({kind:'webinar-ready'}, '*');
 })();

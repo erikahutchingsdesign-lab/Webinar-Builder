@@ -123,6 +123,7 @@
           <div class="portrait"><img src="assets/jeff.jpeg" alt="" /></div>
           <div class="portrait right"><img src="assets/dhruv.png" alt="" /></div>
           <div class="portrait"><img src="assets/loic.jpg" alt="" /></div>
+          <div class="portrait" style="display:none"><img src="assets/loic.jpg" alt="" /></div>
         </div>
       </div>
     </div>
@@ -165,6 +166,7 @@
       if (d.s1Photo) setPortrait(0, d.s1Photo);
       if (d.s2Photo) setPortrait(1, d.s2Photo);
       if (d.s3Photo) setPortrait(2, d.s3Photo);
+      if (d.speakerCount != null){ document.querySelectorAll('.faces .portrait').forEach((el,i)=>{ el.style.display = (i < d.speakerCount) ? '' : 'none'; }); }
     });
     window.parent && window.parent.postMessage({kind:'webinar-ready'}, '*');
   })();

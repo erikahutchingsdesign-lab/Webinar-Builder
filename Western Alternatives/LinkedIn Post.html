@@ -262,6 +262,14 @@
             <div class="title-line" data-field="s3-title">President, Opus Wealth Management</div>
           </div>
         </div>
+        <div class="speaker" style="display:none">
+          <div class="portrait"><img src="assets/loic.jpg" alt="" /></div>
+          <div>
+            <div class="role" data-field="s4-role">Speaker</div>
+            <div class="name" data-field="s4-name">Loic<br/>LeMener<span class="cred">CFA®, MBA, CFP®</span></div>
+            <div class="title-line" data-field="s4-title">President, Opus Wealth Management</div>
+          </div>
+        </div>
       </div>
 
     
@@ -321,6 +329,13 @@
       if (d.s2Title != null) setHtml('[data-field="s2-title"]', d.s2Title);
       if (d.s1Photo) setPortrait(0, d.s1Photo);
       if (d.s2Photo) setPortrait(1, d.s2Photo);
+      if (d.s3Name != null) setHtml('[data-field="s3-name"]', d.s3Name);
+      if (d.s3Title != null) setHtml('[data-field="s3-title"]', d.s3Title);
+      if (d.s3Photo) setPortrait(2, d.s3Photo);
+      if (d.s4Name != null) setHtml('[data-field="s4-name"]', d.s4Name);
+      if (d.s4Title != null) setHtml('[data-field="s4-title"]', d.s4Title);
+      if (d.s4Photo) setPortrait(3, d.s4Photo);
+      if (d.speakerCount != null){ var _sps=document.querySelectorAll('.speaker'); _sps.forEach((el,i)=>{ el.style.display=(i<d.speakerCount)?'':'none'; }); var _c=document.querySelector('.speakers'); if(_c){ if(d.speakerCount<=2){ _c.style.justifyContent='center'; _sps.forEach(el=>el.style.flex='0 0 auto'); } else { _c.style.justifyContent=''; _sps.forEach(el=>el.style.flex=''); } } }
     });
     window.parent && window.parent.postMessage({kind:'webinar-ready'}, '*');
   })();
