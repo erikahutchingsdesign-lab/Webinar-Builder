@@ -154,6 +154,11 @@
   .portrait img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.9) contrast(1.02);}
   .portrait.right img{object-position:50% 28%;}
   .speaker .role{display:none;}
+  .mod-eyebrow{
+    font-family:var(--sans);font-weight:600;
+    font-size:16px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--horizon);margin-bottom:8px;
+  }
   .speaker .name{
     font-family:var(--serif);font-weight:400;
     font-size:42px;line-height:1.02;color:var(--cloud);letter-spacing:-.005em;
@@ -241,6 +246,7 @@
         <div class="speaker">
           <div class="portrait"><img src="assets/jeff.jpeg" alt="Jeff Welday" /></div>
           <div>
+            <div class="mod-eyebrow">Moderator</div>
             <div class="role" data-field="s1-role">Speaker</div>
             <div class="name" data-field="s1-name">Jeff<br/>Welday</div>
             <div class="title-line" data-field="s1-title">Chief Development Officer, Western Alternative Strategies</div>
@@ -249,6 +255,7 @@
         <div class="speaker">
           <div class="portrait right"><img src="assets/dhruv.png" alt="Dhruv Maniktala, CFA®" /></div>
           <div>
+            <div class="mod-eyebrow">Speaker</div>
             <div class="role" data-field="s2-role">Speaker</div>
             <div class="name" data-field="s2-name">Dhruv<br/>Maniktala<span class="cred">CFA®</span></div>
             <div class="title-line" data-field="s2-title">Chief Investment Officer; Partner</div>
@@ -257,6 +264,7 @@
         <div class="speaker">
           <div class="portrait"><img src="assets/loic.jpg" alt="Loic LeMener, CFA®, MBA, CFP®" /></div>
           <div>
+            <div class="mod-eyebrow">Speaker</div>
             <div class="role" data-field="s3-role">Speaker</div>
             <div class="name" data-field="s3-name">Loic<br/>LeMener<span class="cred">CFA®, MBA, CFP®</span></div>
             <div class="title-line" data-field="s3-title">President, Opus Wealth Management</div>
@@ -265,6 +273,7 @@
         <div class="speaker" style="display:none">
           <div class="portrait"><img src="assets/loic.jpg" alt="" /></div>
           <div>
+            <div class="mod-eyebrow">Speaker</div>
             <div class="role" data-field="s4-role">Speaker</div>
             <div class="name" data-field="s4-name">Loic<br/>LeMener<span class="cred">CFA®, MBA, CFP®</span></div>
             <div class="title-line" data-field="s4-title">President, Opus Wealth Management</div>
